@@ -39,8 +39,12 @@ pop3_server.pass_(password)
 print("pop3 login successful!")
 
 status = pop3_server.stat()
-print(status)
-print(pop3_server.list())
+response, body, octets = pop3_server.retr(2)
+
+for line in body:
+    print(repr(line)[2:-1])
+
+pop3_server.rset()
 
 smtp_server.quit()
 pop3_server.quit()
