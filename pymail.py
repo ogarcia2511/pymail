@@ -14,7 +14,7 @@ def send(email_address):
 def read():
     pass
 
-_ = system.("clear")
+_ = system("clear")
 
 print("- * - * - * P y m a i l * - * - * -")
 print("Welcome to the Python Gmail client!")
@@ -40,6 +40,7 @@ print("pop3 login successful!")
 
 status = pop3_server.stat()
 print(status)
+print(pop3_server.list())
 
 smtp_server.quit()
 pop3_server.quit()
