@@ -25,7 +25,7 @@ def call_editor(msg):
 
 def user_choice(options):
     while True:
-        print("Please select an option: ")
+        print("Please select: ")
         for index, elem in enumerate(options):
             print("(%d) %s" % (index + 1, elem))
 
@@ -64,7 +64,22 @@ def edit_recipients(addrs):
 
     while not done:
         cmd = user_choice(addrs)
-    return
+
+       
+        if cmd < len(addrs) - 1:
+            prompt = input("delete %s? [y/n]" % addrs[cmd - 1])
+            if prompt == 'y' or prompt == 'Y':
+                # delete this email address
+                pass
+            else:
+                print("Invalid option! Not doing anything...")
+        elif cmd == len(addrs) - 1:
+            prompt = input("enter new address: ")
+            new_addr = addrs.insert(len(addrs) - 2, prompt)
+        elif cmd == len(addrs):
+            done = True # quit here            
+
+    return addrs[:2] # strip the (new) and (quit)
 
 def send_menu(email_addr):
     done = False
@@ -112,8 +127,10 @@ def main():
 
     print('\nInitializing mail servers...')
     # STUDENT WORK
-    smtp = smtplib.SMTP_SSL('smtp.gmail.com', smtp_port)
-    imap = imaplib.IMAP4_SSL('imap.gmail.com', imap_port)
+    smtp = 0
+    imap = 0
+    #smtp = smtplib.SMTP_SSL('smtp.gmail.com', smtp_port)
+    #imap = imaplib.IMAP4_SSL('imap.gmail.com', imap_port)
     #smtp.ehlo()
 
     #smtp.login(email_address, password)
