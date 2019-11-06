@@ -2,10 +2,26 @@
 # Santa Clara University
 
 import smtplib, imaplib, ssl
-import subprocess
+import subprocess, tempfile
 import email
 import getpass
-from os import system
+import os
+
+def call_editor(msg):
+    # linked to vi
+    (f_desc, path) = tempfile.mkstemp()
+    f = os.fdopen(f_desc, 'w')
+    f.write(msg)
+    f.close()
+
+    editor = os.getenv('EDITOR', 'vi')
+    subprocess.call('%s %s' % (editor, path), shell=True)
+
+    with open(path, 'r') as fp:
+        new_msg = fp.read().rstrip('\n')
+
+    os.unlink(path)
+    return new_msg
 
 def user_choice(options):
     while True:
@@ -26,37 +42,63 @@ def user_choice(options):
             continue
             
 
-def main_menu(smtp, imap):
-    quit = False
+def main_menu(smtp, imap, email_addr):
+    done = False
     
-    while not quit:
-        menu_options = ["read", "write", "quit"]
+    while not done:
+        menu_options = ["read", "send", "quit"]
         cmd = user_choice(menu_options)
 
         if cmd == 1:
             print("entered read")
         elif cmd == 2:
-            print("entered write")
+            print("entered send")
+            send_menu(email_addr)
         elif cmd == 3:
             print("quitting!")
             quit = True
             continue
 
+def edit_recipients(addrs):
+    done = False
+
+    while not done:
+        cmd = user_choice(addrs)
+    return
+
+def send_menu(email_addr):
+    done = False
+    to_addr = []
+    cc_addr = []
+    bcc_addr = []
+    msg = ""
+
+    while not done:
+        menu_options = ['edit TO: ', 'edit CC: ', 'edit BCC:', 'edit message content', 'quit']
+        cmd = user_choice(menu_options)
+
+        if cmd == 1:
+            to_addr = edit_recipients(to_addr + ['add new +'] + ['quit'])
+        elif cmd == 2:
+            cc_addr = edit_recipients(cc_addr + ['add new +'] + ['quit'])
+        elif cmd == 3: 
+            bcc_addr = edit_recipients(bcc_addr + ['add new +'] + ['quit'])
+        elif cmd == 4:
+            msg = call_editor(msg)
+        elif cmd == 5:
+            exit
 
 
-def send_menu(email_address):
-    back = False
+            
 
-    while not back:
-        menu_options = ['']
-    receiver_email = input("Please enter receiver's email address: ")
-    smtp_server.sendmail(email_address, receiver_email, "SUBJECT: Test\nHi from me!\n")
+    #receiver_email = input("Please enter receiver's email address: ")
+    #smtp_server.sendmail(email_address, receiver_email, "SUBJECT: Test\nHi from me!\n")
 
 def read_menu():
     pass
 
 def main():
-    _ = system("clear")
+    _ = os.system("clear")
 
     print("- * - * - * P y m a i l * - * - * -")
     print("Welcome to the Python Gmail client!")
@@ -64,7 +106,7 @@ def main():
     smtp_port = 465 # with SSL
     imap_port = 993 # with SSL
 
-    email_address = input("Please enter your email address: ") # converted raw_input to input
+    email_addr = input("Please enter your email address: ") # converted raw_input to input
     password = getpass.getpass("Please enter your password: ")
 
 
@@ -87,7 +129,7 @@ def main():
 
     #imap.select("inbox")
 
-    main_menu(smtp, imap)
+    main_menu(smtp, imap, email_addr)
 
     #smtp.quit()
     #imap.close(); imap.logout()
