@@ -46,6 +46,8 @@ def main_menu(smtp, imap, email_addr):
     done = False
     
     while not done:
+        make_visual("Main Menu")
+
         menu_options = ["read", "send", "quit"]
         cmd = user_choice(menu_options)
 
@@ -56,25 +58,28 @@ def main_menu(smtp, imap, email_addr):
             send_menu(email_addr)
         elif cmd == 3:
             print("quitting!")
-            quit = True
+            done = True
             continue
 
-def edit_recipients(addrs):
+def edit_recipients(addrs):    
     done = False
 
     while not done:
+        make_visual("Editing Recipients")
+        
         cmd = user_choice(addrs)
-
        
         if cmd < len(addrs) - 1:
-            prompt = input("delete %s? [y/n]" % addrs[cmd - 1])
+            prompt = input("delete %s? [y/n]: " % addrs[cmd - 1])
             if prompt == 'y' or prompt == 'Y':
                 # delete this email address
                 pass
+            elif prompt == 'n' or prompt == 'N':
+                print("Not doing anything...")
             else:
                 print("Invalid option! Not doing anything...")
         elif cmd == len(addrs) - 1:
-            prompt = input("enter new address: ")
+            prompt = input("enter new address: ") #TODO: check if email valid
             new_addr = addrs.insert(len(addrs) - 2, prompt)
         elif cmd == len(addrs):
             done = True # quit here            
@@ -89,6 +94,8 @@ def send_menu(email_addr):
     msg = ""
 
     while not done:
+        make_visual("Sending Mail")
+
         menu_options = ['edit TO: ', 'edit CC: ', 'edit BCC:', 'edit message content', 'quit']
         cmd = user_choice(menu_options)
 
@@ -101,7 +108,7 @@ def send_menu(email_addr):
         elif cmd == 4:
             msg = call_editor(msg)
         elif cmd == 5:
-            exit
+            done = True
 
 
             
@@ -112,9 +119,18 @@ def send_menu(email_addr):
 def read_menu():
     pass
 
-def main():
+def make_visual(title):
     _ = os.system("clear")
 
+    bar_length = len('* ' + title + ' *')
+
+    print('*' * bar_length)
+    print('* ' + title + ' *')
+    print('*' * bar_length)
+    print('\n')
+
+def main():
+    _ = os.system("clear")
     print("- * - * - * P y m a i l * - * - * -")
     print("Welcome to the Python Gmail client!")
 
