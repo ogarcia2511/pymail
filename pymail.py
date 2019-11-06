@@ -24,22 +24,21 @@ def call_editor(msg):
     return new_msg
 
 def user_choice(options):
-    while True:
-        print("Please select: ")
-        for index, elem in enumerate(options):
-            print("(%d) %s" % (index + 1, elem))
+    print("Please select: ")
+    for index, elem in enumerate(options):
+        print("(%d) %s" % (index + 1, elem))
 
-        try:
-            choice = int(input())
-        except ValueError:
-            print("Invalid option!")
-            continue
+    try:
+        choice = int(input())
+    except ValueError:
+        print("Invalid option!")
+        return None
 
-        if 0 < choice <= len(options):
-            return choice
-        else:
-            print("Invalid option!")
-            continue
+    if 0 < choice <= len(options):
+        return choice
+    else:
+        print("Invalid option!")
+        return None
             
 
 def main_menu(smtp, imap, email_addr):
@@ -60,6 +59,8 @@ def main_menu(smtp, imap, email_addr):
             print("quitting!")
             done = True
             continue
+        else:
+            continue
 
 def edit_recipients(addrs):    
     done = False
@@ -72,8 +73,8 @@ def edit_recipients(addrs):
         if cmd < len(addrs) - 1:
             prompt = input("delete %s? [y/n]: " % addrs[cmd - 1])
             if prompt == 'y' or prompt == 'Y':
-                # delete this email address
-                pass
+
+                remove(addrs[cmd - 1])
             elif prompt == 'n' or prompt == 'N':
                 print("Not doing anything...")
             else:
@@ -84,7 +85,7 @@ def edit_recipients(addrs):
         elif cmd == len(addrs):
             done = True # quit here            
 
-    return addrs[:2] # strip the (new) and (quit)
+    return addrs[:-2] # strip the (new) and (quit)
 
 def send_menu(email_addr):
     done = False
