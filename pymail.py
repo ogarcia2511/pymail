@@ -1,50 +1,96 @@
 # Omar Garcia
 # Santa Clara University
 
-import smtplib, poplib, ssl
+import smtplib, imaplib, ssl
 import subprocess
+import email
 import getpass
 from os import system
 
+def user_choice(options):
+    while True:
+        print("Please select an option: ")
+        for index, elem in enumerate(options):
+            print("(%d) %s" % (index + 1, elem))
 
-def send(email_address):
+        try:
+            choice = int(input())
+        except ValueError:
+            print("Invalid option!")
+            continue
+
+        if 0 < choice <= len(options):
+            return choice
+        else:
+            print("Invalid option!")
+            continue
+            
+
+def main_menu(smtp, imap):
+    quit = False
+    
+    while not quit:
+        menu_options = ["read", "write", "quit"]
+        cmd = user_choice(menu_options)
+
+        if cmd == 1:
+            print("entered read")
+        elif cmd == 2:
+            print("entered write")
+        elif cmd == 3:
+            print("quitting!")
+            quit = True
+            continue
+
+
+
+def send_menu(email_address):
+    back = False
+
+    while not back:
+        menu_options = ['']
     receiver_email = input("Please enter receiver's email address: ")
     smtp_server.sendmail(email_address, receiver_email, "SUBJECT: Test\nHi from me!\n")
 
-def read():
+def read_menu():
     pass
 
-_ = system("clear")
+def main():
+    _ = system("clear")
 
-print("- * - * - * P y m a i l * - * - * -")
-print("Welcome to the Python Gmail client!")
+    print("- * - * - * P y m a i l * - * - * -")
+    print("Welcome to the Python Gmail client!")
 
-smtp_port = 465 # with SSL
-pop3_port = 995 # with SSL
+    smtp_port = 465 # with SSL
+    imap_port = 993 # with SSL
 
-email_address = input("Please enter your email address: ") # converted raw_input to input
-password = getpass.getpass("Please enter your password: ")
+    email_address = input("Please enter your email address: ") # converted raw_input to input
+    password = getpass.getpass("Please enter your password: ")
 
 
-print('\nInitializing mail server...')
-# STUDENT WORK
-smtp_server = smtplib.SMTP_SSL('smtp.gmail.com', smtp_port)
-pop3_server = poplib.POP3_SSL('pop.gmail.com', pop3_port)
-smtp_server.ehlo()
+    print('\nInitializing mail servers...')
+    # STUDENT WORK
+    smtp = smtplib.SMTP_SSL('smtp.gmail.com', smtp_port)
+    imap = imaplib.IMAP4_SSL('imap.gmail.com', imap_port)
+    #smtp.ehlo()
 
-smtp_server.login(email_address, password)
-print("smtp login successful!")
-pop3_server.user(email_address)
-pop3_server.pass_(password)
-print("pop3 login successful!")
+    #smtp.login(email_address, password)
+    print("smtp login successful!")
+    #imap.login(email_address, password)
+    print("imap login successful!")
 
-status = pop3_server.stat()
-response, body, octets = pop3_server.retr(2)
+    #result, entries = imap.list()
 
-for line in body:
-    print(repr(line)[2:-1])
+    #for entry in entries:
+    #    print(entry)
 
-pop3_server.rset()
 
-smtp_server.quit()
-pop3_server.quit()
+    #imap.select("inbox")
+
+    main_menu(smtp, imap)
+
+    #smtp.quit()
+    #imap.close(); imap.logout()
+
+if __name__ == "__main__":
+    main()
