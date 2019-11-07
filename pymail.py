@@ -47,7 +47,9 @@ def main_menu(smtp, imap, email_addr):
     while not done:
         make_visual("Main Menu")
 
-        menu_options = ["read", "send", "quit"]
+        menu_options = ["read", 
+                        "send", 
+                        "quit"]
         cmd = user_choice(menu_options)
 
         if cmd == 1:
@@ -62,6 +64,24 @@ def main_menu(smtp, imap, email_addr):
         else:
             continue
 
+def send_message(email_addr, to_addr, cc_addr, bcc_addr, subj, msg):
+    send_me = ("From: %s\r\n" % email_addr
+        + "To: %s\r\n" % ",".join(to_addr)
+        + "CC: %s\r\n" % ",".join(cc_addr)
+        + "SUBJECT: %s\r\n" % subj.replace('\n', ' ').replace('\r', ' ')
+        + "\r\n"
+        + msg)
+    
+    all_addrs = to_addr + cc_addr + bcc_addr
+
+    print("all_addrs: ", all_addrs)
+    print("msg body: ", send_me)
+    #smtp.sendmail(email_addr, all_addrs, send_me)
+    print("email sent!")
+    
+    input("press ENTER to continue...")
+            
+
 def edit_recipients(addrs):    
     done = False
 
@@ -69,12 +89,14 @@ def edit_recipients(addrs):
         make_visual("Editing Recipients")
         
         cmd = user_choice(addrs)
-       
+        if cmd is None:
+            continue # needed because cmd < len(...) raises TypeError on None
+
         if cmd < len(addrs) - 1:
             prompt = input("delete %s? [y/n]: " % addrs[cmd - 1])
             if prompt == 'y' or prompt == 'Y':
 
-                remove(addrs[cmd - 1])
+                addrs.pop(cmd - 1)
             elif prompt == 'n' or prompt == 'N':
                 print("Not doing anything...")
             else:
@@ -93,11 +115,18 @@ def send_menu(email_addr):
     cc_addr = []
     bcc_addr = []
     msg = ""
+    subj = ""
 
     while not done:
         make_visual("Sending Mail")
 
-        menu_options = ['edit TO: ', 'edit CC: ', 'edit BCC:', 'edit message content', 'quit']
+        menu_options = ['edit TO: ', 
+                        'edit CC: ', 
+                        'edit BCC:', 
+                        'edit message content',
+                        'edit subject line',
+                        'send message',
+                        'quit']
         cmd = user_choice(menu_options)
 
         if cmd == 1:
@@ -109,10 +138,13 @@ def send_menu(email_addr):
         elif cmd == 4:
             msg = call_editor(msg)
         elif cmd == 5:
+            subj = call_editor(subj)
+        elif cmd == 6:
+            send_message(email_addr, to_addr, cc_addr, bcc_addr, subj, msg)
+            done = True # kick user back to main menu upon completion
+        elif cmd == 7:
             done = True
 
-
-            
 
     #receiver_email = input("Please enter receiver's email address: ")
     #smtp_server.sendmail(email_address, receiver_email, "SUBJECT: Test\nHi from me!\n")
