@@ -54,9 +54,10 @@ def main_menu(smtp, imap, email_addr):
 
         if cmd == 1:
             print("entered read")
+            read_menu(imap)
         elif cmd == 2:
             print("entered send")
-            send_menu(email_addr)
+            send_menu(smtp, email_addr)
         elif cmd == 3:
             print("quitting!")
             done = True
@@ -73,10 +74,13 @@ def send_message(email_addr, to_addr, cc_addr, bcc_addr, subj, msg):
         + msg)
     
     all_addrs = to_addr + cc_addr + bcc_addr
+    if len(all_addrs) == 0:
+        print("ERROR EMPTY TO/CC/BCC FIELDS") #crash here?
+
 
     print("all_addrs: ", all_addrs)
-    print("msg body: ", send_me)
-    #smtp.sendmail(email_addr, all_addrs, send_me)
+    print(send_me)
+    smtp.sendmail(email_addr, all_addrs, send_me)
     print("email sent!")
     
     input("press ENTER to continue...")
@@ -109,7 +113,7 @@ def edit_recipients(addrs):
 
     return addrs[:-2] # strip the (new) and (quit)
 
-def send_menu(email_addr):
+def send_menu(smtp, email_addr):
     done = False
     to_addr = []
     cc_addr = []
@@ -149,8 +153,28 @@ def send_menu(email_addr):
     #receiver_email = input("Please enter receiver's email address: ")
     #smtp_server.sendmail(email_address, receiver_email, "SUBJECT: Test\nHi from me!\n")
 
-def read_menu():
-    pass
+def read_menu(imap):
+    done = False
+
+    result, entries = imap.list()
+    boxes = []
+
+    for entry in entries:
+        decoded_entry = entry.decode('utf-8')
+        conditions = (decoded_entry.split(')')[0].strip('(').split(" ")) # wizardry
+        
+        if '\\Noselect' not in conditions:
+            boxes.append(decoded_entry.split('\"')[-2]) # more wizardry
+        
+    for box in boxes:
+        print(box)
+
+    while not done:
+        # make_visual("Mailbox Selection")
+
+        menu_options = inboxes # get inboxes from imap.list()
+        input("Press enter: ")
+        done = True
 
 def make_visual(title):
     _ = os.system("clear")
@@ -164,8 +188,17 @@ def make_visual(title):
 
 def main():
     _ = os.system("clear")
-    print("- * - * - * P y m a i l * - * - * -")
-    print("Welcome to the Python Gmail client!")
+    
+    # ascii art is subzero style
+    print("""
+ ______   __  __     __    __     ______     __     __        
+/\  == \ /\ \_\ \   /\ "-./  \   /\  __ \   /\ \   /\ \       
+\ \  _-/ \ \____ \  \ \ \-./\ \  \ \  __ \  \ \ \  \ \ \____  
+ \ \_\    \/\_____\  \ \_\ \ \_\  \ \_\ \_\  \ \_\  \ \_____\ 
+  \/_/     \/_____/   \/_/  \/_/   \/_/\/_/   \/_/   \/_____/ 
+                                                              
+        """)
+    print("\nWelcome to the Python Gmail client!\n")
 
     smtp_port = 465 # with SSL
     imap_port = 993 # with SSL
@@ -175,16 +208,15 @@ def main():
 
 
     print('\nInitializing mail servers...')
-    # STUDENT WORK
     smtp = 0
     imap = 0
-    #smtp = smtplib.SMTP_SSL('smtp.gmail.com', smtp_port)
-    #imap = imaplib.IMAP4_SSL('imap.gmail.com', imap_port)
-    #smtp.ehlo()
+    smtp = smtplib.SMTP_SSL('smtp.gmail.com', smtp_port)
+    imap = imaplib.IMAP4_SSL('imap.gmail.com', imap_port)
+    smtp.ehlo()
 
-    #smtp.login(email_address, password)
+    smtp.login(email_addr, password)
     print("smtp login successful!")
-    #imap.login(email_address, password)
+    imap.login(email_addr, password)
     print("imap login successful!")
 
     #result, entries = imap.list()
@@ -197,8 +229,8 @@ def main():
 
     main_menu(smtp, imap, email_addr)
 
-    #smtp.quit()
-    #imap.close(); imap.logout()
+    smtp.quit()
+    imap.close(); imap.logout()
 
 if __name__ == "__main__":
     main()
