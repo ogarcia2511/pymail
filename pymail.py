@@ -157,24 +157,29 @@ def read_menu(imap):
     done = False
 
     result, entries = imap.list()
-    boxes = []
+    inboxes = []
 
     for entry in entries:
         decoded_entry = entry.decode('utf-8')
         conditions = (decoded_entry.split(')')[0].strip('(').split(" ")) # wizardry
         
         if '\\Noselect' not in conditions:
-            boxes.append(decoded_entry.split('\"')[-2]) # more wizardry
+            inboxes.append(decoded_entry.split('\"')[-2]) # more wizardry
         
-    for box in boxes:
-        print(box)
-
     while not done:
-        # make_visual("Mailbox Selection")
+        make_visual("Mailbox Selection")
 
-        menu_options = inboxes # get inboxes from imap.list()
-        input("Press enter: ")
-        done = True
+        menu_options = user_choice(inboxes) # get inboxes from imap.list()
+        
+        if cmd is None:
+            done == True
+        else if cmd == len(inboxes): # quit given
+            done == True
+        else:
+            imap.select(inboxes[cmd - 1]) # select given inbox    
+            read_emails(imap) #TODO: write this !!
+            imap.close() # need to decide if push user back to main menu or what
+            
 
 def make_visual(title):
     _ = os.system("clear")
@@ -230,7 +235,8 @@ def main():
     main_menu(smtp, imap, email_addr)
 
     smtp.quit()
-    imap.close(); imap.logout()
+    # imap.close(); # only valid if a mailbox has already been selected
+    imap.logout()
 
 if __name__ == "__main__":
     main()
