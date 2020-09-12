@@ -65,7 +65,7 @@ def main_menu(smtp, imap, email_addr):
         else:
             continue
 
-def send_message(email_addr, to_addr, cc_addr, bcc_addr, subj, msg):
+def send_message(smtp, email_addr, to_addr, cc_addr, bcc_addr, subj, msg):
     send_me = ("From: %s\r\n" % email_addr
         + "To: %s\r\n" % ",".join(to_addr)
         + "CC: %s\r\n" % ",".join(cc_addr)
@@ -144,7 +144,7 @@ def send_menu(smtp, email_addr):
         elif cmd == 5:
             subj = call_editor(subj)
         elif cmd == 6:
-            send_message(email_addr, to_addr, cc_addr, bcc_addr, subj, msg)
+            send_message(smtp, email_addr, to_addr, cc_addr, bcc_addr, subj, msg)
             done = True # kick user back to main menu upon completion
         elif cmd == 7:
             done = True
@@ -152,6 +152,17 @@ def send_menu(smtp, email_addr):
 
     #receiver_email = input("Please enter receiver's email address: ")
     #smtp_server.sendmail(email_address, receiver_email, "SUBJECT: Test\nHi from me!\n")
+
+def read_emails(imap, inbox):
+    response_code, num_messages = imap.select(inbox)
+
+    num_messages = int(num_messages) if num_messages != '' else None
+
+    print(payload)
+
+    # use imap.search(None, 'ALL')
+
+    imap.logout()
 
 def read_menu(imap):
     done = False
@@ -169,16 +180,17 @@ def read_menu(imap):
     while not done:
         make_visual("Mailbox Selection")
 
-        menu_options = user_choice(inboxes) # get inboxes from imap.list()
+        cmd = user_choice(inboxes) # get inboxes from imap.list()
         
         if cmd is None:
             done == True
-        else if cmd == len(inboxes): # quit given
+        elif cmd == len(inboxes): # quit given
             done == True
         else:
             imap.select(inboxes[cmd - 1]) # select given inbox    
-            read_emails(imap) #TODO: write this !!
+            read_emails(imap, inboxes[cmd - 1]) #TODO: write this !!
             imap.close() # need to decide if push user back to main menu or what
+            exit
             
 
 def make_visual(title):
